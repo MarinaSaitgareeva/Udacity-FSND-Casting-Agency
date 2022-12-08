@@ -1,3 +1,20 @@
+try:
+    # 👇️ using Python 3.10+
+    from collections.abc import Iterable
+except ImportError:
+    # 👇️ using Python 3.10-
+    from collections import Iterable
+
+import collections.abc
+
+# 👇️ add attributes to `collections` module
+# before you import the package that causes the issue
+collections.Iterable = collections.abc.Iterable
+collections.Mapping = collections.abc.Mapping
+collections.MutableMapping = collections.abc.MutableMapping
+collections.MutableSet = collections.abc.MutableSet
+collections.Callable = collections.abc.Callable
+
 from flask import (
     Flask,
     request,
@@ -7,7 +24,7 @@ from flask import (
 import json
 from flask_cors import CORS
 
-from .database.models import (
+from database.models import (
     db_drop_and_create_all,
     setup_db,
     setup_migrations,
@@ -15,7 +32,7 @@ from .database.models import (
     Movie,
     Casting
 )
-from .auth.auth import AuthError, requires_auth
+from auth.auth import AuthError, requires_auth
 
 
 def create_app(test_config=None):
@@ -76,21 +93,20 @@ def create_app(test_config=None):
 
 
     @app.route("/actors", methods=["GET"])
-    @requires_auth("get:actors")
-    def retrieve_actors(payload):
+    def retrieve_actors():
         actors = Actor.query.order_by(Actor.fullname).all()
 
         if len(actors) == 0:
             abort(404)
-        
+                
         return jsonify({
             "success": True,
             "actors": [actor.format_json() for actor in actors]
         })
     
     @app.route("/movies", methods=["GET"])
-    @requires_auth("get:movies")
-    def retrieve_movies(payload):
+    # @requires_auth("get:movies")
+    def retrieve_movies():
         movies = Movie.query.order_by(Movie.release_date, Movie.title).all()
 
         if len(movies) == 0:
@@ -155,27 +171,21 @@ def create_app(test_config=None):
 
         if not ("title" in body or
                 "genres" in body or
-                "age" in body or
-                "gender" in body or
                 "release_date" in body or
-                "phone" in body or
-                "photo_link" in body or
-                "seeking_movie" in body):
+                "seeking_actor" in body):
             abort(422)
 
         title = body.get("title", None)
         genres = body.get("genres", None)
-        age = body.get("age", None)
-        gender = body.get("gender", None)
         release_date = body.get("release_date", None)
+        seeking_actor = body.get("seeking_actor", None)
 
         try:
             movie = Movie(
                 title=title,
                 genres=genres,
-                age=age,
-                gender=gender,
-                release_date=release_date
+                release_date=release_date,
+                seeking_actor=seeking_actor
             )
             movie.insert()
             return jsonify({
