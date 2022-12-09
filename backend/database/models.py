@@ -60,7 +60,10 @@ def db_drop_and_create_all():
     )
 
     movie2 = Movie(
-        title="Smile", genres=["Comedy"], release_date="2023.12.12", seeking_actor=True
+        title="Smile",
+        genres=["Comedy"],
+        release_date="2023.12.12",
+        seeking_actor=True,
     )
 
     movie3 = Movie(
