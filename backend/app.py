@@ -297,6 +297,63 @@ def create_app(test_config=None):
         except Exception:
             abort(422)
 
+    @app.route("/actors/<int:actor_id>", methods=["DELETE"])
+    # @requires_auth("patch:actors")
+    def delete_actor(actor_id):
+        try:
+            actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
+
+            if actor is None:
+                abort(404)
+
+            # if len(actor.castings) > 0:
+            #     return (
+            #         jsonify(
+            #             {
+            #                 "success": False,
+            #                 "error": 422,
+            #                 "message": "Unprocessable resource. There are castings associated with this actor",
+            #             }
+            #         ),
+            #         422,
+            #     )
+
+            actor.delete()
+
+            return jsonify({"success": True, "deleted_actor": actor.format_json()})
+
+        except Exception as e:
+            print(e)
+            abort(422)
+
+    @app.route("/movies/<int:movie_id>", methods=["DELETE"])
+    # @requires_auth("patch:movies")
+    def delete_movie(movie_id):
+        try:
+            movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
+
+            if movie is None:
+                abort(404)
+
+            # if len(movie.castings) > 0:
+            #     return (
+            #         jsonify(
+            #             {
+            #                 "success": False,
+            #                 "error": 422,
+            #                 "message": "Unprocessable resource. There are castings associated with this movie",
+            #             }
+            #         ),
+            #         422,
+            #     )
+
+            movie.delete()
+
+            return jsonify({"success": True, "deleted_movie": movie.format_json()})
+
+        except Exception:
+            abort(422)
+
     """
     Error handler for 400, 404, 405, 422, 500
     """
