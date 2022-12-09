@@ -10,12 +10,12 @@ from sqlalchemy import (
     DateTime,
     ARRAY,
     CheckConstraint,
-    Enum)
+    Enum,
+)
 from sqlalchemy.orm import relationship, column_property
 from flask_migrate import Migrate
 import enum
 from datetime import datetime
-from collections import OrderedDict
 
 
 # Take environment variables from ".env"
@@ -56,21 +56,18 @@ def db_drop_and_create_all():
         title="Big house",
         genres=["TV show"],
         release_date="2023.08.01",
-        seeking_actor=True
+        seeking_actor=True,
     )
 
     movie2 = Movie(
-        title="Smile",
-        genres=["Comedy"],
-        release_date="2023.12.12",
-        seeking_actor=True
+        title="Smile", genres=["Comedy"], release_date="2023.12.12", seeking_actor=True
     )
 
     movie3 = Movie(
         title="Cry cry cry",
         genres=["Drama"],
         release_date="2024.12.12",
-        seeking_actor=True
+        seeking_actor=True,
     )
 
     movie1.insert()
@@ -86,7 +83,7 @@ def db_drop_and_create_all():
         email="sandyproom@gnmail.com",
         phone="1234567890",
         photo_link="https://images.unsplash.com/photo-1631084655463-e671365ec05f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80",
-        seeking_movie=True
+        seeking_movie=True,
     )
 
     actor2 = Actor(
@@ -98,7 +95,7 @@ def db_drop_and_create_all():
         email="lunagrey@gnmail.com",
         phone="1234567891",
         photo_link="https://images.unsplash.com/photo-1508326099804-190c33bd8274?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80",
-        seeking_movie=False
+        seeking_movie=False,
     )
 
     actor3 = Actor(
@@ -110,7 +107,7 @@ def db_drop_and_create_all():
         email="johnholms@gnmail.com",
         phone="1234567892",
         photo_link="https://images.unsplash.com/photo-1542583701-20d3be307eba?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=770&q=80",
-        seeking_movie=True
+        seeking_movie=True,
     )
 
     actor1.insert()
@@ -123,7 +120,7 @@ def db_drop_and_create_all():
         role="main",
         casting_date="2023.01.10 10:00:00",
         casting_address="123 DHfghjkd street, New York, NY, 12345",
-        status=StatusType.in_process
+        status=StatusType.in_process,
     )
 
     casting2 = Casting(
@@ -132,7 +129,7 @@ def db_drop_and_create_all():
         role="second",
         casting_date="2022.12.01 15:30:00",
         casting_address="123 DHfghjkd street, New York, NY, 12345",
-        status=StatusType.accept
+        status=StatusType.accept,
     )
 
     casting3 = Casting(
@@ -141,7 +138,7 @@ def db_drop_and_create_all():
         role="second",
         casting_date="2023.10.01 15:00:00",
         casting_address="123 DHfghjkd street, New York, NY, 12345",
-        status=StatusType.in_process
+        status=StatusType.in_process,
     )
 
     casting1.insert()
@@ -174,10 +171,6 @@ class StatusType(enum.Enum):
 
 
 class Movie(db.Model, DbTransactions):
-    """
-    Movies
-    Have title and release date
-    """
     __tablename__ = "Movies"
 
     id = Column(Integer, primary_key=True)
@@ -186,10 +179,8 @@ class Movie(db.Model, DbTransactions):
     release_date = Column(DateTime, default=datetime.now)
     seeking_actor = Column(Boolean, nullable=False, default=True)
     castings = relationship(
-                        "Casting",
-                        backref="movie",
-                        lazy="joined",
-                        cascade="all, delete")
+        "Casting", backref="movie", lazy="joined", cascade="all, delete"
+    )
 
     def __init__(self, title, genres, release_date, seeking_actor):
         self.title = title
@@ -198,7 +189,14 @@ class Movie(db.Model, DbTransactions):
         self.seeking_actor = seeking_actor
 
     def format_json(self):
-        ordered_keys = ["id", "title", "genres", "release_date", "seeking_actor", "accepted_actors"]
+        ordered_keys = [
+            "id",
+            "title",
+            "genres",
+            "release_date",
+            "seeking_actor",
+            "accepted_actors",
+        ]
 
         data = {
             "id": self.id,
@@ -206,7 +204,11 @@ class Movie(db.Model, DbTransactions):
             "genres": self.genres,
             "release_date": str(self.release_date),
             "seeking_actor": self.seeking_actor,
-            "accepted_actors": [{"actor": casting.actor.fullname, "role": casting.role} for casting in self.castings if casting.status == StatusType.accept]
+            "accepted_actors": [
+                {"actor": casting.actor.fullname, "role": casting.role}
+                for casting in self.castings
+                if casting.status == StatusType.accept
+            ],
         }
 
         ordered_data = {key: data[key] for key in ordered_keys}
@@ -221,10 +223,6 @@ class Movie(db.Model, DbTransactions):
 
 
 class Actor(db.Model, DbTransactions):
-    """
-    Actors
-    Have full name, age and gender
-    """
     __tablename__ = "Actors"
 
     id = Column(Integer, primary_key=True)
@@ -238,10 +236,8 @@ class Actor(db.Model, DbTransactions):
     photo_link = Column(String(500), nullable=False)
     seeking_movie = Column(Boolean, nullable=False, default=True)
     castings = relationship(
-        "Casting",
-        backref="actor",
-        lazy="joined",
-        cascade="all, delete")
+        "Casting", backref="actor", lazy="joined", cascade="all, delete"
+    )
     __table_args__ = (CheckConstraint(age > 0, name="check_valid_age"), {})
 
     def __init__(
@@ -254,7 +250,7 @@ class Actor(db.Model, DbTransactions):
         email,
         phone,
         photo_link,
-        seeking_movie
+        seeking_movie,
     ):
         self.first_name = first_name
         self.last_name = last_name
@@ -268,7 +264,23 @@ class Actor(db.Model, DbTransactions):
 
     def format_json(self):
 
-        ordered_keys = ["id", "first_name", "last_name", "full_name", "age", "gender", "email", "phone", "photo_link", "seeking_movie", "casting_total", "castings_upcoming", "castings_past", "casting_reject", "movies_success"]
+        ordered_keys = [
+            "id",
+            "first_name",
+            "last_name",
+            "full_name",
+            "age",
+            "gender",
+            "email",
+            "phone",
+            "photo_link",
+            "seeking_movie",
+            "casting_total",
+            "castings_upcoming",
+            "castings_past",
+            "casting_reject",
+            "movies_success",
+        ]
 
         data = {
             "id": self.id,
@@ -282,10 +294,32 @@ class Actor(db.Model, DbTransactions):
             "photo_link": self.photo_link,
             "seeking_movie": self.seeking_movie,
             "casting_total": len(self.castings),
-            "castings_upcoming": len([casting for casting in self.castings if casting.casting_date > datetime.now()]),
-            "castings_past": len([casting for casting in self.castings if casting.casting_date <= datetime.now()]),
-            "casting_reject": len([casting for casting in self.castings if casting.status == StatusType.reject]),
-            "movies_success": [{"movie": casting.movie.title, "role": casting.role} for casting in self.castings if casting.status == StatusType.accept]
+            "castings_upcoming": len(
+                [
+                    casting
+                    for casting in self.castings
+                    if casting.casting_date > datetime.now()
+                ]
+            ),
+            "castings_past": len(
+                [
+                    casting
+                    for casting in self.castings
+                    if casting.casting_date <= datetime.now()
+                ]
+            ),
+            "casting_reject": len(
+                [
+                    casting
+                    for casting in self.castings
+                    if casting.status == StatusType.reject
+                ]
+            ),
+            "movies_success": [
+                {"movie": casting.movie.title, "role": casting.role}
+                for casting in self.castings
+                if casting.status == StatusType.accept
+            ],
         }
 
         ordered_data = {key: data[key] for key in ordered_keys}
@@ -314,15 +348,7 @@ class Casting(db.Model, DbTransactions):
     casting_address = Column(String(250), nullable=False)
     status = Column(Enum(StatusType), nullable=False)
 
-    def __init__(
-        self,
-        actor_id,
-        movie_id,
-        role,
-        casting_date,
-        casting_address,
-        status
-    ):
+    def __init__(self, actor_id, movie_id, role, casting_date, casting_address, status):
         self.actor_id = actor_id
         self.movie_id = movie_id
         self.role = role
@@ -338,7 +364,7 @@ class Casting(db.Model, DbTransactions):
             "role": self.role,
             "casting_date": str(self.casting_date),
             "casting_address": self.casting_address,
-            "status": str(self.status.value)
+            "status": str(self.status.value),
         }
 
     def __repr__(self):
