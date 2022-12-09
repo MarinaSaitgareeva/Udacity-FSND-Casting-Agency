@@ -15,7 +15,8 @@ collections.MutableMapping = collections.abc.MutableMapping
 collections.MutableSet = collections.abc.MutableSet
 collections.Callable = collections.abc.Callable
 
-from flask import Flask, request, jsonify, abort
+import os
+from flask import Flask, request, jsonify, abort, redirect
 from flask_cors import CORS
 
 from database.models import (
@@ -27,6 +28,12 @@ from database.models import (
     Casting,
 )
 from auth.auth import AuthError, requires_auth
+
+
+AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")
+API_AUDIENCE = os.getenv("API_AUDIENCE")
+CLIENT_ID = os.getenv("CLIENT_ID")
+CALLBACK_URI = os.getenv("CALLBACK_URI")
 
 
 def create_app(test_config=None):
@@ -73,10 +80,21 @@ def create_app(test_config=None):
 
     @app.route("/")
     def index():
-        return jsonify({"succes": True, "message": "Welcome to our Casting Agency"})
+        return jsonify({"success": True, "message": "Welcome to our Casting Agency"})
+
+    @app.route("/login")
+    def redirect_login():
+        login_url = f"https://{AUTH0_DOMAIN}/authorize?audience={API_AUDIENCE}&response_type=token&client_id={CLIENT_ID}&redirect_uri={CALLBACK_URI}"
+        return redirect(login_url)
+
+    @app.route("/logout")
+    def redirect_logout():
+        logout_url = f"https://{AUTH0_DOMAIN}/v2/logout"
+        return redirect(logout_url)
 
     @app.route("/actors", methods=["GET"])
-    def retrieve_actors():
+    @requires_auth("get:actors")
+    def retrieve_actors(payload):
         actors = Actor.query.order_by(Actor.fullname).all()
 
         if len(actors) == 0:
@@ -86,18 +104,9 @@ def create_app(test_config=None):
             {"success": True, "actors": [actor.format_json() for actor in actors]}
         )
 
-    @app.route("/actors/<int:actor_id>", methods=["GET"])
-    def retrieve_actor(actor_id):
-        actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
-
-        if actor is None:
-            abort(404)
-
-        return jsonify({"success": True, "actor": actor.format_json()})
-
     @app.route("/movies", methods=["GET"])
-    # @requires_auth("get:movies")
-    def retrieve_movies():
+    @requires_auth("get:movies")
+    def retrieve_movies(payload):
         movies = Movie.query.order_by(Movie.release_date, Movie.title).all()
 
         if len(movies) == 0:
@@ -107,9 +116,19 @@ def create_app(test_config=None):
             {"success": True, "movies": [movie.format_json() for movie in movies]}
         )
 
+    @app.route("/actors/<int:actor_id>", methods=["GET"])
+    @requires_auth("get:actors")
+    def retrieve_actor(payload, actor_id):
+        actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
+
+        if actor is None:
+            abort(404)
+
+        return jsonify({"success": True, "actor": actor.format_json()})
+
     @app.route("/movies/<int:movie_id>", methods=["GET"])
-    # @requires_auth("get:movies")
-    def retrieve_movie(movie_id):
+    @requires_auth("get:movies")
+    def retrieve_movie(payload, movie_id):
         movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
 
         if movie is None:
@@ -118,8 +137,8 @@ def create_app(test_config=None):
         return jsonify({"success": True, "movie": movie.format_json()})
 
     @app.route("/actors/create", methods=["POST"])
-    # @requires_auth("post:actors")
-    def add_actor():
+    @requires_auth("post:actor")
+    def add_actor(payload):
         body = request.get_json()
 
         if not (
@@ -172,8 +191,8 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route("/movies/create", methods=["POST"])
-    # @requires_auth("post:movies")
-    def add_movie():
+    @requires_auth("post:movie")
+    def add_movie(payload):
         body = request.get_json()
 
         if not (
@@ -211,8 +230,8 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route("/actors/<int:actor_id>", methods=["PATCH"])
-    # @requires_auth("patch:actors")
-    def modify_actor(actor_id):
+    @requires_auth("patch:actors")
+    def modify_actor(payload, actor_id):
         body = request.get_json()
 
         if not (
@@ -262,8 +281,8 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route("/movies/<int:movie_id>", methods=["PATCH"])
-    # @requires_auth("patch:movies")
-    def modify_movie(movie_id):
+    @requires_auth("patch:movies")
+    def modify_movie(payload, movie_id):
         body = request.get_json()
 
         if not (
@@ -298,8 +317,8 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route("/actors/<int:actor_id>", methods=["DELETE"])
-    # @requires_auth("patch:actors")
-    def delete_actor(actor_id):
+    @requires_auth("delete:actors")
+    def delete_actor(payload, actor_id):
         try:
             actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
 
@@ -327,8 +346,8 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route("/movies/<int:movie_id>", methods=["DELETE"])
-    # @requires_auth("patch:movies")
-    def delete_movie(movie_id):
+    @requires_auth("delete:movies")
+    def delete_movie(payload, movie_id):
         try:
             movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
 
