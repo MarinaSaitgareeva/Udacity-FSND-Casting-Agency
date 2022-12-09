@@ -12,7 +12,7 @@ from sqlalchemy import (
     CheckConstraint,
     Enum,
 )
-from sqlalchemy.orm import relationship, column_property
+from sqlalchemy.orm import relationship, column_property, backref
 from flask_migrate import Migrate
 import enum
 from datetime import datetime
@@ -182,7 +182,7 @@ class Movie(db.Model, DbTransactions):
     release_date = Column(DateTime, default=datetime.now)
     seeking_actor = Column(Boolean, nullable=False, default=True)
     castings = relationship(
-        "Casting", backref="movie", lazy="joined", cascade="all, delete"
+        "Casting", backref=backref("movie", lazy="joined"), cascade="all, delete"
     )
 
     def __init__(self, title, genres, release_date, seeking_actor):
@@ -199,6 +199,10 @@ class Movie(db.Model, DbTransactions):
             "release_date",
             "seeking_actor",
             "accepted_actors",
+            "casting_total",
+            "castings_upcoming",
+            "castings_past",
+            "casting_reject",
         ]
 
         data = {
@@ -212,6 +216,28 @@ class Movie(db.Model, DbTransactions):
                 for casting in self.castings
                 if casting.status == StatusType.accept
             ],
+            "casting_total": len(self.castings),
+            "castings_upcoming": len(
+                [
+                    casting
+                    for casting in self.castings
+                    if casting.casting_date > datetime.now()
+                ]
+            ),
+            "castings_past": len(
+                [
+                    casting
+                    for casting in self.castings
+                    if casting.casting_date <= datetime.now()
+                ]
+            ),
+            "casting_reject": len(
+                [
+                    casting
+                    for casting in self.castings
+                    if casting.status == StatusType.reject
+                ]
+            ),
         }
 
         ordered_data = {key: data[key] for key in ordered_keys}
@@ -239,7 +265,7 @@ class Actor(db.Model, DbTransactions):
     photo_link = Column(String(500), nullable=False)
     seeking_movie = Column(Boolean, nullable=False, default=True)
     castings = relationship(
-        "Casting", backref="actor", lazy="joined", cascade="all, delete"
+        "Casting", backref=backref("actor", lazy="joined"), cascade="all, delete"
     )
     __table_args__ = (CheckConstraint(age > 0, name="check_valid_age"), {})
 
@@ -344,8 +370,8 @@ class Casting(db.Model, DbTransactions):
     __tablename__ = "Casting"
 
     id = Column(Integer, primary_key=True)
-    actor_id = Column(Integer, ForeignKey("Actors.id"))
-    movie_id = Column(Integer, ForeignKey("Movies.id"))
+    actor_id = Column(Integer, ForeignKey("Actors.id", ondelete="cascade"))
+    movie_id = Column(Integer, ForeignKey("Movies.id", ondelete="cascade"))
     role = Column(String(120), nullable=False)
     casting_date = Column(DateTime, default=datetime.now)
     casting_address = Column(String(250), nullable=False)
