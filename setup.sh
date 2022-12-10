@@ -1,6 +1,6 @@
 #!/bin/bash
-export DATABASE_URL="postgresql+psycopg2://marinas:2001@localhost:5432/casting_agency"
-export DATABASE_TEST_URI="postgresql+psycopg2://marinas:2001:5432/casting_agency_test"
+export DATABASE_URL="postgresql://marinas:2001@localhost:5432/casting_agency"
+export DATABASE_TEST_URI="postgresql://marinas:2001:5432/casting_agency_test"
 
 export FLASK_APP=app.py
 export FLASK_DEBUG=True
