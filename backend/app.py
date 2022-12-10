@@ -142,32 +142,32 @@ def create_app(test_config=None):
     @app.route("/actors/create", methods=["POST"])
     @requires_auth("post:actor")
     def add_actor(payload):
-        body = request.get_json()
-
-        if not (
-            "first_name" in body
-            or "last_name" in body
-            or "fullname" in body
-            or "age" in body
-            or "gender" in body
-            or "email" in body
-            or "phone" in body
-            or "photo_link" in body
-            or "seeking_movie" in body
-        ):
-            abort(400)
-
-        first_name = body.get("first_name", None)
-        last_name = body.get("last_name", None)
-        fullname = body.get("fullname", None)
-        age = body.get("age", None)
-        gender = body.get("gender", None)
-        email = body.get("email", None)
-        phone = body.get("phone", None)
-        photo_link = body.get("photo_link", None)
-        seeking_movie = body.get("seeking_movie", None)
-
         try:
+            body = request.get_json()
+
+            if (
+                "first_name" not in body
+                or "last_name" not in body
+                or "fullname" not in body
+                or "age" not in body
+                or "gender" not in body
+                or "email" not in body
+                or "phone" not in body
+                or "photo_link" not in body
+                or "seeking_movie" not in body
+            ):
+                abort(422)
+
+            first_name = body.get("first_name", None)
+            last_name = body.get("last_name", None)
+            fullname = body.get("fullname", None)
+            age = body.get("age", None)
+            gender = body.get("gender", None)
+            email = body.get("email", None)
+            phone = body.get("phone", None)
+            photo_link = body.get("photo_link", None)
+            seeking_movie = body.get("seeking_movie", None)
+
             actor = Actor(
                 first_name=first_name,
                 last_name=last_name,
@@ -235,32 +235,32 @@ def create_app(test_config=None):
     @app.route("/actors/<int:actor_id>", methods=["PATCH"])
     @requires_auth("patch:actors")
     def modify_actor(payload, actor_id):
-        body = request.get_json()
-
-        if not (
-            "first_name" in body
-            or "last_name" in body
-            or "fullname" in body
-            or "age" in body
-            or "gender" in body
-            or "email" in body
-            or "phone" in body
-            or "photo_link" in body
-            or "seeking_movie" in body
-        ):
-            abort(400)
-
-        first_name = body.get("first_name", None)
-        last_name = body.get("last_name", None)
-        fullname = body.get("fullname", None)
-        age = body.get("age", None)
-        gender = body.get("gender", None)
-        email = body.get("email", None)
-        phone = body.get("phone", None)
-        photo_link = body.get("photo_link", None)
-        seeking_movie = body.get("seeking_movie", None)
-
         try:
+            body = request.get_json()
+
+            if (
+                "first_name" not in body
+                or "last_name" not in body
+                or "fullname" not in body
+                or "age" not in body
+                or "gender" not in body
+                or "email" not in body
+                or "phone" not in body
+                or "photo_link" not in body
+                or "seeking_movie" not in body
+            ):
+                abort(422)
+
+            first_name = body.get("first_name", None)
+            last_name = body.get("last_name", None)
+            fullname = body.get("fullname", None)
+            age = body.get("age", None)
+            gender = body.get("gender", None)
+            email = body.get("email", None)
+            phone = body.get("phone", None)
+            photo_link = body.get("photo_link", None)
+            seeking_movie = body.get("seeking_movie", None)
+
             actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
 
             if actor is None:
@@ -281,27 +281,27 @@ def create_app(test_config=None):
             return jsonify({"success": True, "modified_actor": actor.format_json()})
 
         except Exception:
-            abort(422)
+            abort(404)
 
     @app.route("/movies/<int:movie_id>", methods=["PATCH"])
     @requires_auth("patch:movies")
     def modify_movie(payload, movie_id):
-        body = request.get_json()
-
-        if not (
-            "title" in body
-            or "genres" in body
-            or "release_date" in body
-            or "seeking_actor" in body
-        ):
-            abort(400)
-
-        title = body.get("title", None)
-        genres = body.get("genres", None)
-        release_date = body.get("release_date", None)
-        seeking_actor = body.get("seeking_actor", None)
-
         try:
+            body = request.get_json()
+
+            if (
+                "title" not in body
+                or "genres" not in body
+                or "release_date" not in body
+                or "seeking_actor" not in body
+            ):
+                abort(422)
+
+            title = body.get("title", None)
+            genres = body.get("genres", None)
+            release_date = body.get("release_date", None)
+            seeking_actor = body.get("seeking_actor", None)
+
             movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
 
             if movie is None:
@@ -317,7 +317,7 @@ def create_app(test_config=None):
             return jsonify({"success": True, "modified_movie": movie.format_json()})
 
         except Exception:
-            abort(422)
+            abort(404)
 
     @app.route("/actors/<int:actor_id>", methods=["DELETE"])
     @requires_auth("delete:actors")
@@ -345,7 +345,7 @@ def create_app(test_config=None):
             return jsonify({"success": True, "deleted_actor": actor.format_json()})
 
         except Exception:
-            abort(422)
+            abort(404)
 
     @app.route("/movies/<int:movie_id>", methods=["DELETE"])
     @requires_auth("delete:movies")
@@ -373,7 +373,7 @@ def create_app(test_config=None):
             return jsonify({"success": True, "deleted_movie": movie.format_json()})
 
         except Exception:
-            abort(422)
+            abort(404)
 
     """
     Error handler for 400, 404, 405, 422, 500
