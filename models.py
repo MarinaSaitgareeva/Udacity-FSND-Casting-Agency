@@ -52,7 +52,7 @@ def setup_migrations(app):
 def db_drop_and_create_all():
     db.drop_all()
     db.create_all()
-    # add one demo row which is helping in POSTMAN test
+
     movie1 = Movie(
         title="Big house",
         genres=["TV show"],
@@ -179,7 +179,7 @@ class Movie(db.Model, DbTransactions):
 
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
-    genres = Column(ARRAY(String), nullable=False)
+    genres = Column(ARRAY(String(120)), nullable=False)
     release_date = Column(DateTime, default=datetime.now)
     seeking_actor = Column(Boolean, nullable=False, default=True)
     castings = relationship(
@@ -261,7 +261,7 @@ class Actor(db.Model, DbTransactions):
     fullname = column_property(first_name + " " + last_name)
     age = Column(Integer, nullable=False)
     gender = Column(Enum(GenderType), nullable=False)
-    email = Column(String, unique=True, nullable=False)
+    email = Column(String(120), unique=True, nullable=False)
     phone = Column(String(120), unique=True, nullable=False)
     photo_link = Column(String(500), nullable=False)
     seeking_movie = Column(Boolean, nullable=False, default=True)
