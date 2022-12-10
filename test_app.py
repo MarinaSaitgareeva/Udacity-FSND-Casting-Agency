@@ -15,10 +15,8 @@ from models import (
 
 load_dotenv()
 
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_HOST = os.getenv("DB_HOST")
-DB_TEST_NAME = os.getenv("DB_TEST_NAME")
+DB_PATH_TEST = os.getenv("DATABASE_URL_TEST")
+
 
 CASTING_ASSISTANT_TOKEN = os.getenv("CASTING_ASSISTANT_TOKEN")
 CASTING_DIRECTOR_TOKEN = os.getenv("CASTING_DIRECTOR_TOKEN")
@@ -35,9 +33,7 @@ class CastingAgencyTestCase(unittest.TestCase):
     def setUp(self):
         self.app = create_app()
         self.client = self.app.test_client
-        self.DB_PATH = (
-            f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_TEST_NAME}"
-        )
+        self.DB_PATH = DB_PATH_TEST
         setup_db(self.app, self.DB_PATH)
         with self.app.app_context():
             self.db = SQLAlchemy()

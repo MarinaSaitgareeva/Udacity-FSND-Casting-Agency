@@ -2,10 +2,10 @@ from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 
 from models import db
-from app import app
+from app import APP
 
-migrate = Migrate(app, db, render_as_batch=False)
-manager = Manager(app)
+migrate = Migrate(APP, db, render_as_batch=False)
+manager = Manager(APP)
 
 manager.add_command("db", MigrateCommand)
 
