@@ -46,6 +46,7 @@ def setup_db(app, database_path=DB_PATH):
 
 def setup_migrations(app):
     migrate = Migrate(app, db, render_as_batch=False)
+    migrate.init_app(app, db, render_as_batch=False)
 
 
 def db_drop_and_create_all():
