@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify, abort, redirect
 from flask_cors import CORS
 
-from database.models import (
+from models import (
     setup_db,
     db_drop_and_create_all,
     setup_migrations,
