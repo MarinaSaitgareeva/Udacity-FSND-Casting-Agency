@@ -3,7 +3,7 @@ export DATABASE_URL="postgresql://marinas:2001@localhost:5432/casting_agency"
 export DATABASE_TEST_URI="postgresql://marinas:2001:5432/casting_agency_test"
 
 export FLASK_APP=app.py
-export FLASK_ENV=development
+export FLASK_DEBUG=True
 
 export AUTH0_DOMAIN="fs2022nd.us.auth0.com"
 export API_AUDIENCE="Casting_Agency_FSND"
