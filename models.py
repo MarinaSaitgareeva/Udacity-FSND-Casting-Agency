@@ -22,7 +22,7 @@ from datetime import datetime
 # (file should be in the root directory of your project)
 load_dotenv()
 
-DB_PATH = os.getenv("DATABASE_URL")
+DB_PATH = os.getenv("DATABASE_URL").replace("postgres://", "postgresql://", 1)
 
 db = SQLAlchemy()
 migrate = Migrate()
