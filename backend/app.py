@@ -16,6 +16,7 @@ collections.MutableSet = collections.abc.MutableSet
 collections.Callable = collections.abc.Callable
 
 import os
+from dotenv import load_dotenv
 from flask import Flask, request, jsonify, abort, redirect
 from flask_cors import CORS
 
@@ -29,6 +30,8 @@ from database.models import (
 )
 from auth.auth import AuthError, requires_auth
 
+
+load_dotenv()
 
 AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")
 API_AUDIENCE = os.getenv("API_AUDIENCE")
@@ -152,7 +155,7 @@ def create_app(test_config=None):
             or "photo_link" in body
             or "seeking_movie" in body
         ):
-            abort(422)
+            abort(400)
 
         first_name = body.get("first_name", None)
         last_name = body.get("last_name", None)
@@ -201,7 +204,7 @@ def create_app(test_config=None):
             or "release_date" in body
             or "seeking_actor" in body
         ):
-            abort(422)
+            abort(400)
 
         title = body.get("title", None)
         genres = body.get("genres", None)
@@ -245,7 +248,7 @@ def create_app(test_config=None):
             or "photo_link" in body
             or "seeking_movie" in body
         ):
-            abort(422)
+            abort(400)
 
         first_name = body.get("first_name", None)
         last_name = body.get("last_name", None)
@@ -291,7 +294,7 @@ def create_app(test_config=None):
             or "release_date" in body
             or "seeking_actor" in body
         ):
-            abort(422)
+            abort(400)
 
         title = body.get("title", None)
         genres = body.get("genres", None)
@@ -341,8 +344,7 @@ def create_app(test_config=None):
 
             return jsonify({"success": True, "deleted_actor": actor.format_json()})
 
-        except Exception as e:
-            print(e)
+        except Exception:
             abort(422)
 
     @app.route("/movies/<int:movie_id>", methods=["DELETE"])
