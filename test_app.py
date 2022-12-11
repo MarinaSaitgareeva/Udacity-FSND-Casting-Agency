@@ -66,7 +66,7 @@ class CastingAgencyTestCase(unittest.TestCase):
         self.assertEqual(data["success"], False)
         self.assertEqual(data["message"], "Authorization header is expected")
 
-    def test_401_invalid_token_error(self):
+    def test_400_invalid_token_error(self):
         res = self.client().get(
             "/actors", headers={"Authorization": f"Bearer {INVALID_TOKEN}"}
         )
